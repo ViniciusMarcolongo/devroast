@@ -1,48 +1,48 @@
 # Devroast
 
-Devroast is an app for pasting code, getting roasted, and understanding why the code deserves it.
+Devroast e um app para colar codigo, levar uma roastada e entender por que aquele trecho merece vergonha publica.
 
-It combines a terminal-inspired interface with quick code review feedback, a shame leaderboard, and a product voice that feels blunt without losing usefulness.
+Ele combina uma interface inspirada em terminal com feedback rapido de revisao de codigo, um leaderboard de vergonhas e uma personalidade mais afiada sem perder utilidade.
 
-## What it does
+## O que faz
 
-- lets you paste code into an editor-style input
-- prepares the flow for roast mode and future analysis results
-- shows a public leaderboard of the most questionable snippets
-- uses reusable UI primitives designed from Pencil
+- permite colar codigo em um editor com cara de terminal
+- prepara o fluxo para escolher o modo de roast e futuros resultados de analise
+- mostra um leaderboard publico com os snippets mais questionaveis
+- usa componentes reutilizaveis desenhados a partir do Pencil
 
-## Current state
+## Estado atual
 
-This version is still static-first.
+Esta versao ainda e static-first.
 
-- the homepage and leaderboard are already navigable
-- the code editor is interactive
-- the roast action is intentionally not connected to an API yet
-- the UI and component system are being shaped before backend integration
+- a home e o leaderboard ja podem ser navegados
+- o editor de codigo ja e interativo
+- a acao principal de roast ainda nao esta conectada a uma API
+- a base visual e o sistema de componentes estao sendo consolidados antes da integracao com backend
 
-## Product feel
+## Sensacao do produto
 
-Devroast is built to feel like:
+O Devroast foi pensado para parecer:
 
-- a code review tool with personality
-- a terminal interface without becoming hard to use
-- a playful product that still respects clarity and structure
+- uma ferramenta de code review com personalidade
+- uma interface de terminal sem sacrificar clareza
+- um produto divertido que ainda respeita legibilidade e estrutura
 
-## Screens today
+## Telas atuais
 
-- `Home` - paste code, choose roast mode, and start the review flow
-- `Leaderboard` - browse the worst code on the internet, ranked by shame
+- `Home` - cole seu codigo, escolha o roast mode e comece o fluxo de analise
+- `Leaderboard` - veja os piores codigos da internet, ranqueados por vergonha
 
-## Coming next
+## Proximos passos
 
-- actual roast results based on pasted code
-- richer analysis output and diffs
-- API integration for submissions and leaderboard data
+- resultados reais de roast com base no codigo enviado
+- saidas de analise e diffs mais ricos
+- integracao com API para envios e dados do leaderboard
 
-## Local development
+## Desenvolvimento local
 
 ```bash
 pnpm dev
 ```
 
-Then open `http://localhost:3000`.
+Depois, abra `http://localhost:3000`.
