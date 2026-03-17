@@ -3,6 +3,7 @@ import { IBM_Plex_Mono, JetBrains_Mono } from "next/font/google";
 
 import { SiteHeader } from "@/components/site-header";
 import { cn } from "@/lib/utils";
+import { TRPCReactProvider } from "@/trpc/client";
 
 import "./globals.css";
 
@@ -31,10 +32,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={cn(jetBrainsMono.variable, ibmPlexMono.variable)}>
-        <div className="min-h-screen bg-app-bg">
-          <SiteHeader />
-          {children}
-        </div>
+        <TRPCReactProvider>
+          <div className="min-h-screen bg-app-bg">
+            <SiteHeader />
+            {children}
+          </div>
+        </TRPCReactProvider>
       </body>
     </html>
   );

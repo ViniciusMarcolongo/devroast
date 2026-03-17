@@ -1,6 +1,7 @@
 import {
   and,
   asc,
+  avg,
   count,
   desc,
   eq,
@@ -350,6 +351,30 @@ export async function getLeaderboardPage({
   return {
     entries: entries satisfies LeaderboardEntry[],
     total: totalRow,
+  };
+}
+
+export async function getHomepageMetrics() {
+  const [row] = await db
+    .select({
+      avgScore: avg(roastResults.score),
+      roastedCodesCount: count(),
+    })
+    .from(roastResults)
+    .innerJoin(
+      roastSubmissions,
+      eq(roastSubmissions.id, roastResults.submissionId),
+    )
+    .where(
+      and(
+        eq(roastResults.visibility, "public"),
+        eq(roastSubmissions.status, "completed"),
+      ),
+    );
+
+  return {
+    avgScore: Number(Number(row?.avgScore ?? 0).toFixed(1)),
+    roastedCodesCount: row?.roastedCodesCount ?? 0,
   };
 }
 

@@ -1,7 +1,6 @@
 import { CodeEditorShell } from "@/components/code-editor-shell";
+import { HomeHeroMetrics } from "@/components/home-hero-metrics";
 import { LeaderboardTable } from "@/components/leaderboard-table";
-
-const heroStats = ["2,847 codes roasted", "avg score: 4.2/10"] as const;
 
 export default function Home() {
   return (
@@ -22,11 +21,7 @@ export default function Home() {
 
           <CodeEditorShell />
 
-          <div className="flex items-center gap-5 font-mono-body text-[11px] text-text-tertiary">
-            {heroStats.map((stat) => (
-              <span key={stat}>{stat}</span>
-            ))}
-          </div>
+          <HomeHeroMetrics />
         </section>
 
         <div className="h-20" />
