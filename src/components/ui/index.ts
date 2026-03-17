@@ -8,7 +8,7 @@ export {
   analysisCardVariants,
 } from "./analysis-card";
 export { Button, buttonVariants } from "./button";
-export { CodeBlock, codeBlockVariants } from "./code-block";
+export { CodeBlock, CodeBlockHeader, codeBlockVariants } from "./code-block";
 export {
   DiffLineCode,
   DiffLinePrefix,

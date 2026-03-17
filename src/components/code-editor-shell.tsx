@@ -23,6 +23,7 @@ import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   Button,
+  CodeBlockHeader,
   SwitchControl,
   SwitchLabel,
   SwitchRoot,
@@ -307,36 +308,34 @@ export function CodeEditorShell({
   return (
     <div className="flex w-full max-w-[780px] flex-col gap-4 text-left">
       <div className="overflow-hidden border border-border-subtle bg-surface-primary">
-        <div className="flex h-10 items-center gap-3 border-b border-border-subtle px-4">
-          <span className="size-2.5 rounded-full bg-danger" />
-          <span className="size-2.5 rounded-full bg-warning" />
-          <span className="size-2.5 rounded-full bg-accent-green" />
-          <span className="min-w-0 flex-1" />
-          <div className="relative">
-            <label className="sr-only" htmlFor="editor-language-select">
-              Select code language
-            </label>
-            <select
-              className="h-7 min-w-[138px] appearance-none border border-border-subtle bg-surface-primary px-2 pr-7 font-mono-ui text-[11px] text-text-secondary outline-none transition-colors hover:text-text-primary focus-visible:border-accent-green"
-              id="editor-language-select"
-              onChange={handleLanguageChange}
-              value={selectedLanguage ?? "auto"}
-            >
-              {editorLanguageSelectOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-text-tertiary" />
-          </div>
-          <span className="hidden font-mono-body text-[11px] text-text-tertiary md:block">
-            {languageStatusLabel}
-          </span>
-          <span className="font-mono-ui text-[12px] text-text-tertiary">
-            {fileName}
-          </span>
-        </div>
+        <CodeBlockHeader
+          actions={
+            <>
+              <div className="relative">
+                <label className="sr-only" htmlFor="editor-language-select">
+                  Select code language
+                </label>
+                <select
+                  className="h-7 min-w-[138px] appearance-none border border-border-subtle bg-surface-primary px-2 pr-7 font-mono-ui text-[11px] text-text-secondary outline-none transition-colors hover:text-text-primary focus-visible:border-accent-green"
+                  id="editor-language-select"
+                  onChange={handleLanguageChange}
+                  value={selectedLanguage ?? "auto"}
+                >
+                  {editorLanguageSelectOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-text-tertiary" />
+              </div>
+              <span className="hidden font-mono-body text-[11px] text-text-tertiary md:block">
+                {languageStatusLabel}
+              </span>
+            </>
+          }
+          fileName={fileName}
+        />
 
         <div className="bg-[#101010]">
           <CodeEditorSurface

@@ -5,6 +5,7 @@ import {
   AnalysisCardTitle,
   Button,
   CodeBlock,
+  CodeBlockHeader,
   DiffLineCode,
   DiffLinePrefix,
   DiffLineRoot,
@@ -165,22 +166,24 @@ export default async function ComponentsPage() {
           description="Server-rendered syntax highlighting with the current terminal shell styling."
           title="CodeBlock"
         >
-          <CodeBlock
-            code={[
-              "function calculateTotal(items) {",
-              "  let total = 0;",
-              "",
-              "  for (const item of items) {",
-              "    total += item.price;",
-              "  }",
-              "",
-              "  return total;",
-              "}",
-            ].join("\n")}
-            fileName="calculateTotal.ts"
-            lang="typescript"
-            size="lg"
-          />
+          <div className="overflow-hidden border border-border-subtle bg-surface-primary">
+            <CodeBlockHeader fileName="calculateTotal.ts" />
+            <CodeBlock
+              code={[
+                "function calculateTotal(items) {",
+                "  let total = 0;",
+                "",
+                "  for (const item of items) {",
+                "    total += item.price;",
+                "  }",
+                "",
+                "  return total;",
+                "}",
+              ].join("\n")}
+              lang="typescript"
+              size="lg"
+            />
+          </div>
         </Section>
 
         <Section
