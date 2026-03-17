@@ -14,6 +14,7 @@ import {
   EditorView,
   highlightActiveLine,
   keymap,
+  lineNumbers,
   placeholder as placeholderExtension,
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
@@ -42,6 +43,8 @@ type CodeEditorShellProps = {
   helperText?: string;
   placeholder?: string;
 };
+
+const MAX_SNIPPET_CHAR_COUNT = 2000;
 
 const editorHighlightStyle = HighlightStyle.define([
   { tag: tags.keyword, color: "#f59e0b" },
@@ -72,10 +75,28 @@ const editorTheme = EditorView.theme(
       fontFamily: "var(--font-mono-ui)",
       lineHeight: "1.45",
       minHeight: "320px",
+      maxHeight: "560px",
       overflow: "auto",
-      paddingTop: "16px",
-      paddingBottom: "16px",
       textAlign: "left",
+    },
+    ".cm-gutters": {
+      backgroundColor: "#0f0f0f",
+      borderRight: "1px solid rgba(42, 42, 42, 0.7)",
+      color: "#4b5563",
+      minWidth: "48px",
+    },
+    ".cm-gutter": {
+      minHeight: "320px",
+    },
+    ".cm-lineNumbers .cm-gutterElement": {
+      boxSizing: "border-box",
+      fontFamily: "var(--font-mono-ui)",
+      fontSize: "13px",
+      lineHeight: "1.45",
+      minWidth: "24px",
+      paddingLeft: "12px",
+      paddingRight: "12px",
+      textAlign: "right",
     },
     ".cm-content": {
       minHeight: "320px",
@@ -84,9 +105,13 @@ const editorTheme = EditorView.theme(
       paddingRight: "16px",
     },
     ".cm-line": {
+      lineHeight: "1.45",
       padding: "0",
     },
     ".cm-activeLine": {
+      backgroundColor: "transparent",
+    },
+    ".cm-activeLineGutter": {
       backgroundColor: "transparent",
     },
     ".cm-selectionBackground, ::selection": {
@@ -113,6 +138,7 @@ const baseExtensions: Extension[] = [
   drawSelection(),
   dropCursor(),
   highlightActiveLine(),
+  lineNumbers(),
   keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
   syntaxHighlighting(editorHighlightStyle),
   editorTheme,
@@ -123,7 +149,6 @@ type CodeEditorSurfaceProps = {
   code: string;
   languageExtension: Extension;
   onCodeChange: (value: string) => void;
-  onScrollChange: (scrollTop: number) => void;
   placeholder: string;
 };
 
@@ -131,7 +156,6 @@ function CodeEditorSurface({
   code,
   languageExtension,
   onCodeChange,
-  onScrollChange,
   placeholder,
 }: CodeEditorSurfaceProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
@@ -168,20 +192,13 @@ function CodeEditorSurface({
       }),
     });
 
-    const handleScroll = () => {
-      onScrollChange(view.scrollDOM.scrollTop);
-    };
-
-    view.scrollDOM.addEventListener("scroll", handleScroll);
-
     viewRef.current = view;
 
     return () => {
-      view.scrollDOM.removeEventListener("scroll", handleScroll);
       view.destroy();
       viewRef.current = null;
     };
-  }, [code, languageExtension, onScrollChange, placeholder]);
+  }, [code, languageExtension, placeholder]);
 
   useEffect(() => {
     const view = viewRef.current;
@@ -222,11 +239,10 @@ function CodeEditorSurface({
 
 export function CodeEditorShell({
   actionLabel = "$ roast_my_code",
-  helperText = "allow tabs, auto detect on, 75k+ char limit, paste and cry",
+  helperText = "allow tabs, auto detect on, 2k char limit, paste and cry",
   placeholder = "// paste your code here\n// we will roast it soon\n",
 }: CodeEditorShellProps) {
   const [code, setCode] = useState("");
-  const [scrollTop, setScrollTop] = useState(0);
   const [detectedLanguage, setDetectedLanguage] =
     useState<SupportedCodeLanguageId>("plaintext");
   const [selectedLanguage, setSelectedLanguage] =
@@ -234,15 +250,9 @@ export function CodeEditorShell({
   const [languageExtension, setLanguageExtension] = useState<Extension>([]);
 
   const activeLanguage = selectedLanguage ?? detectedLanguage;
-  const isDisabled = code.trim().length === 0;
-  const lineCount = useMemo(() => {
-    const totalLines = code.length > 0 ? code.split("\n").length : 1;
-    return Math.max(totalLines, 16);
-  }, [code]);
-  const lineNumbers = useMemo(
-    () => Array.from({ length: lineCount }, (_, index) => index + 1),
-    [lineCount],
-  );
+  const characterCount = code.length;
+  const isOverCharacterLimit = characterCount > MAX_SNIPPET_CHAR_COUNT;
+  const isDisabled = code.trim().length === 0 || isOverCharacterLimit;
 
   useEffect(() => {
     const handle = window.setTimeout(() => {
@@ -328,28 +338,13 @@ export function CodeEditorShell({
           </span>
         </div>
 
-        <div className="grid min-h-[320px] grid-cols-[48px_minmax(0,1fr)] bg-[#101010]">
-          <div className="overflow-hidden border-r border-border-subtle/70 bg-surface-muted px-3 py-4">
-            <div
-              className="font-mono-ui text-[12px] leading-[1.45] text-text-tertiary"
-              style={{ transform: `translateY(-${scrollTop}px)` }}
-            >
-              {lineNumbers.map((lineNumber) => (
-                <div className="text-right" key={lineNumber}>
-                  {lineNumber}
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="bg-[#101010]">
-            <CodeEditorSurface
-              code={code}
-              languageExtension={languageExtension}
-              onCodeChange={setCode}
-              onScrollChange={setScrollTop}
-              placeholder={placeholder}
-            />
-          </div>
+        <div className="bg-[#101010]">
+          <CodeEditorSurface
+            code={code}
+            languageExtension={languageExtension}
+            onCodeChange={setCode}
+            placeholder={placeholder}
+          />
         </div>
       </div>
 
@@ -365,7 +360,15 @@ export function CodeEditorShell({
             {helperText}
           </p>
         </div>
-        <div className="flex items-center justify-start md:justify-end">
+        <div className="flex items-center justify-between gap-3 md:justify-end">
+          <span
+            className={`font-mono-body text-[11px] ${
+              isOverCharacterLimit ? "text-danger" : "text-text-tertiary"
+            }`}
+          >
+            {characterCount.toLocaleString()}/
+            {MAX_SNIPPET_CHAR_COUNT.toLocaleString()} chars
+          </span>
           <Button className="min-w-[164px]" disabled={isDisabled}>
             {actionLabel}
           </Button>
