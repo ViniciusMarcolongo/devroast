@@ -50,6 +50,12 @@ export async function CodeBlock({
   ...props
 }: CodeBlockProps) {
   const rawLines = code.split("\n");
+  let lineOffset = 0;
+  const lineKeys = rawLines.map((line) => {
+    const key = `${lineOffset}-${line.length}`;
+    lineOffset += line.length + 1;
+    return key;
+  });
   const { bg, fg, tokens } = await codeToTokens(code, {
     lang,
     theme: "vesper",
@@ -76,12 +82,15 @@ export async function CodeBlock({
       >
         <code className="grid font-mono-ui text-[13px] leading-[1.45]">
           {tokens.map((line, index) => {
-            const lineKey = `${line[0]?.offset ?? `empty-${rawLines[index] ?? ""}`}-${rawLines[index] ?? ""}`;
+            const rawLine = rawLines[index] ?? "";
+            const serializedLine = line
+              .map((token) => `${token.offset}:${token.content}`)
+              .join("|");
 
             return (
               <span
                 className="grid min-h-[1.45em] grid-cols-[minmax(0,1fr)]"
-                key={lineKey}
+                key={`line-${lineKeys[index]}-${serializedLine}`}
               >
                 <span
                   className={cn(
@@ -98,7 +107,7 @@ export async function CodeBlock({
                     {line.length > 0 ? (
                       line.map((token) => (
                         <span
-                          key={`${token.offset}-${token.content}`}
+                          key={`${rawLine}-${token.offset}-${token.content}`}
                           style={getTokenStyle(token)}
                         >
                           {token.content}
