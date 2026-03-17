@@ -3,7 +3,7 @@
 import { Switch as BaseSwitch } from "@base-ui/react/switch";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import * as React from "react";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 import { tv, type VariantProps } from "tailwind-variants";
 
 import { cn } from "@/lib/utils";
@@ -70,9 +70,14 @@ type SwitchSize = NonNullable<
 >;
 
 type SwitchContextValue = {
-  buttonProps: ComponentPropsWithoutRef<"button">;
   checked: boolean;
+  onCheckedChange?: BaseSwitchProps["onCheckedChange"];
+  rootProps: Omit<
+    BaseSwitchProps,
+    "checked" | "children" | "className" | "defaultChecked" | "onCheckedChange"
+  >;
   size: SwitchSize;
+  toggle: (checked: boolean, eventDetails: unknown) => void;
 };
 
 const SwitchContext = createContext<SwitchContextValue | null>(null);
@@ -93,10 +98,10 @@ export type SwitchRootProps = BaseSwitchProps &
     className?: string;
   };
 
-export type SwitchControlProps = Omit<
-  ComponentPropsWithoutRef<"button">,
-  "type"
->;
+export type SwitchControlProps = {
+  children?: ReactNode;
+  className?: string;
+};
 
 export type SwitchThumbProps = Omit<
   ComponentPropsWithoutRef<typeof BaseSwitch.Thumb>,
@@ -110,50 +115,57 @@ export type SwitchLabelProps = ComponentPropsWithoutRef<"span">;
 export function SwitchRoot({
   children,
   className,
+  checked,
+  defaultChecked = false,
   onCheckedChange,
   size = "md",
   ...props
 }: SwitchRootProps) {
+  const [uncontrolledChecked, setUncontrolledChecked] =
+    useState(defaultChecked);
+  const isControlled = typeof checked === "boolean";
+  const currentChecked = checked ?? uncontrolledChecked;
+
+  const contextValue: SwitchContextValue = {
+    checked: currentChecked,
+    onCheckedChange,
+    rootProps: props,
+    size,
+    toggle: (nextChecked, eventDetails) => {
+      if (!isControlled) {
+        setUncontrolledChecked(nextChecked);
+      }
+
+      onCheckedChange?.(nextChecked, eventDetails as never);
+    },
+  };
+
   return (
-    <BaseSwitch.Root
-      {...props}
-      nativeButton
-      onCheckedChange={(checked, eventDetails) => {
-        onCheckedChange?.(checked, eventDetails);
-      }}
-      render={(buttonProps, state) => (
-        <SwitchContext.Provider
-          value={{ buttonProps, checked: state.checked, size }}
-        >
-          <div className={cn(switchWrapperVariants({ size }), className)}>
-            {children}
-          </div>
-        </SwitchContext.Provider>
-      )}
-    />
+    <SwitchContext.Provider value={contextValue}>
+      <div className={cn(switchWrapperVariants({ size }), className)}>
+        {children}
+      </div>
+    </SwitchContext.Provider>
   );
 }
 
 export const SwitchControl = React.forwardRef<
   HTMLButtonElement,
   SwitchControlProps
->(({ children, className, ...props }, ref) => {
-  const { buttonProps, size } = useSwitchContext();
+>(({ children, className }, ref) => {
+  const { checked, rootProps, size, toggle } = useSwitchContext();
 
   return (
-    <button
-      {...buttonProps}
-      {...props}
-      className={cn(
-        buttonProps.className,
-        switchRootVariants({ size }),
-        className,
-      )}
+    <BaseSwitch.Root
+      {...rootProps}
+      checked={checked}
+      className={cn(switchRootVariants({ size }), className)}
+      nativeButton={false}
+      onCheckedChange={toggle}
       ref={ref}
-      type="button"
     >
       {children}
-    </button>
+    </BaseSwitch.Root>
   );
 });
 

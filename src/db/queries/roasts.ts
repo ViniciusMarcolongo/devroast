@@ -88,6 +88,15 @@ export type LeaderboardEntry = {
   publishedAt: Date | null;
 };
 
+export type HomepageShameLeaderboardEntry = {
+  activeLanguage: string | null;
+  lineCount: number;
+  rawCode: string;
+  score: string;
+  sourceLabel: string | null;
+  submissionPublicId: string;
+};
+
 export type RoastWithDetails = {
   submission: typeof roastSubmissions.$inferSelect;
   result: typeof roastResults.$inferSelect;
@@ -376,6 +385,36 @@ export async function getHomepageMetrics() {
     avgScore: Number(Number(row?.avgScore ?? 0).toFixed(1)),
     roastedCodesCount: row?.roastedCodesCount ?? 0,
   };
+}
+
+export async function getHomepageShameLeaderboardEntries(limit: number) {
+  return db
+    .select({
+      submissionPublicId: roastSubmissions.publicId,
+      sourceLabel: roastSubmissions.sourceLabel,
+      rawCode: roastSubmissions.rawCode,
+      activeLanguage: roastSubmissions.activeLanguage,
+      lineCount: roastSubmissions.lineCount,
+      score: roastResults.score,
+    })
+    .from(roastResults)
+    .innerJoin(
+      roastSubmissions,
+      eq(roastSubmissions.id, roastResults.submissionId),
+    )
+    .where(
+      and(
+        eq(roastResults.visibility, "public"),
+        eq(roastSubmissions.status, "completed"),
+      ),
+    )
+    .orderBy(
+      asc(roastResults.score),
+      asc(roastResults.publishedAt),
+      desc(roastResults.createdAt),
+    )
+    .limit(limit)
+    .then((entries) => entries satisfies HomepageShameLeaderboardEntry[]);
 }
 
 export async function getRoastsBySubmissionIds(submissionIds: string[]) {

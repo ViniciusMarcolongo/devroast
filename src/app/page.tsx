@@ -1,6 +1,6 @@
 import { CodeEditorShell } from "@/components/code-editor-shell";
 import { HomeHeroMetrics } from "@/components/home-hero-metrics";
-import { LeaderboardTable } from "@/components/leaderboard-table";
+import { HomeShameLeaderboard } from "@/components/home-shame-leaderboard";
 
 export default function Home() {
   return (
@@ -26,10 +26,7 @@ export default function Home() {
 
         <div className="h-20" />
 
-        <LeaderboardTable
-          ctaHref="/leaderboard"
-          footerLabel="view full leaderboard ->"
-        />
+        <HomeShameLeaderboard />
       </div>
     </main>
   );
